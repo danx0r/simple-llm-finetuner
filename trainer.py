@@ -140,7 +140,7 @@ class Trainer():
             )[0].to(self.model.device)
 
         ret = self.tokenizer.decode(output, skip_special_tokens=True).strip()
-        # print ("DEBUG generate returns args:", ret)
+        print ("DEBUG generate returns:", f"++++++++++++++++++++++++++++++++++++++\n{ret}\n```````````````````````````````````")
         return ret
     
     def tokenize_sample(self, item, max_seq_length, add_eos_token=True):
