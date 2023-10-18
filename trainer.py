@@ -297,7 +297,7 @@ if __name__ == '__main__':
     t.load_model(MODEL)
 
     args = {'do_sample': True, 'max_new_tokens': 80, 'num_beams': 1, 'repetition_penalty': 1.5, 'temperature': 0.1, 'top_p': 0.3, 'top_k': 40}
-    prompt = "Human: How is cheese made?\n\nAssistant:"
+    prompt = "Human: How is cheese made?\nAssistant:"
     print(f"++++++OUTPUT no lora+++++++\n{t.generate(prompt, **args)}\n`````````````````````````````````")
 
     t.load_lora(LORA_TRAINING_PARAMS['lora_name'])
