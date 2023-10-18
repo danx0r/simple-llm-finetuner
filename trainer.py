@@ -295,7 +295,7 @@ if __name__ == '__main__':
     prompt = "Human: How is cheese made?\n\nAssistant:"
     print(t.generate(prompt))
 
-    t.load_lora(LORA_TRAINING_PARAMS['lora'])
+    t.load_lora(LORA_TRAINING_PARAMS['lora_name'])
     print(t.generate(prompt))
 
     t.unload_lora()
