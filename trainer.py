@@ -107,7 +107,7 @@ class Trainer():
         self.lora_name = None
 
     def generate(self, prompt, **kwargs):
-        print ("DEBUG generate", prompt, kwargs)
+        print ("DEBUG generate args:", kwargs, "prompt:", f"\n-----------------------------\n{prompt}\n_________________________+")
         assert self.model is not None
         assert self.model_name is not None
         assert self.tokenizer is not None
@@ -184,7 +184,7 @@ class Trainer():
         return training_dataset
 
     def train(self, training_text=None, new_peft_model_name=None, **kwargs):
-        print ("DEBUG train", training_text[:1000], new_peft_model_name, kwargs)
+        print ("DEBUG train:", new_peft_model_name, kwargs, f"training_text:\n===================================\n{training_text}\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         assert self.should_abort is False
         assert self.model is not None
         assert self.model_name is not None
