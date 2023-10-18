@@ -93,8 +93,10 @@ class Trainer():
         assert self.model is not None
         
         if hasattr(self.model, 'load_adapter'):
+            print ("DEBUG A")
             self.model.load_adapter(lora_name, adapter_name=lora_name)
         else:
+            print ("DEBUG B")
             self.model = peft.PeftModel.from_pretrained(self.model, lora_name, adapter_name=lora_name)
             
         self.model.set_adapter(lora_name)
