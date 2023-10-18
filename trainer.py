@@ -107,7 +107,7 @@ class Trainer():
         self.lora_name = None
 
     def generate(self, prompt, **kwargs):
-        print ("DEBUG generate args:", kwargs, "prompt:", f"\n-----------------------------\n{prompt}\n_________________________+")
+        print ("DEBUG generate args:", kwargs, "prompt:", f"\n-----------------------------\n{prompt}\n__________________________")
         assert self.model is not None
         assert self.model_name is not None
         assert self.tokenizer is not None
@@ -140,7 +140,7 @@ class Trainer():
             )[0].to(self.model.device)
 
         ret = self.tokenizer.decode(output, skip_special_tokens=True).strip()
-        print ("DEBUG generate", ret)
+        # print ("DEBUG generate returns args:", ret)
         return ret
     
     def tokenize_sample(self, item, max_seq_length, add_eos_token=True):
@@ -293,10 +293,10 @@ if __name__ == '__main__':
     t.load_model(MODEL)
 
     prompt = "Human: How is cheese made?\n\nAssistant:"
-    print(t.generate(prompt))
+    print(f"++++++OUTPUT no lora+++++++\n{t.generate(prompt)}`````````````````````````````````")
 
     t.load_lora(LORA_TRAINING_PARAMS['lora_name'])
-    print(t.generate(prompt))
+    print(f"++++++OUTPUT lora++++++++\n{t.generate(prompt)}`````````````````````````````````")
 
     t.unload_lora()
-    print(t.generate(prompt))
+    print(f"++++++OUTPUT unload lora+++++++\n{t.generate(prompt)}````````````````````````````````")
