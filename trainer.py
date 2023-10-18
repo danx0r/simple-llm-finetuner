@@ -298,5 +298,8 @@ if __name__ == '__main__':
     t.load_lora(LORA_TRAINING_PARAMS['lora_name'])
     print(f"++++++OUTPUT lora++++++++\n{t.generate(prompt)}`````````````````````````````````")
 
+    prompt = "Human: How is cheese made?\n\nAssistant:"
+    print(f"++++++OUTPUT no lora+++++++\n{t.generate(prompt)}`````````````````````````````````")
+
     t.unload_lora()
     print(f"++++++OUTPUT unload lora+++++++\n{t.generate(prompt)}````````````````````````````````")
