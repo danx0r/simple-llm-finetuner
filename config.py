@@ -19,6 +19,7 @@ parser.add_argument('--models',
 
 parser.add_argument('--device-map', type=str, default='', help='Device map to use')
 parser.add_argument('--model', type=str, default='cerebras/Cerebras-GPT-2.7B', help='Model to use')
+parser.add_argument('--lora', type=str, default='', help='Lora to use')
 parser.add_argument('--max-seq-length', type=int, default=256, help='Max sequence length')
 parser.add_argument('--micro-batch-size', type=int, default=12, help='Micro batch size')
 parser.add_argument('--gradient-accumulation-steps', type=int, default=8, help='Gradient accumulation steps')
@@ -53,6 +54,7 @@ TRAINING_PARAMS = {
 }
 
 LORA_TRAINING_PARAMS = {
+    'lora_name': args.lora,
     'lora_r': args.lora_r,
     'lora_alpha': args.lora_alpha,
     'lora_dropout': args.lora_dropout,
