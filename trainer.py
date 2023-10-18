@@ -139,7 +139,9 @@ class Trainer():
                 generation_config=generation_config
             )[0].to(self.model.device)
 
-        return self.tokenizer.decode(output, skip_special_tokens=True).strip()
+        ret = self.tokenizer.decode(output, skip_special_tokens=True).strip()
+        print ("DEBUG generate", ret)
+        return ret
     
     def tokenize_sample(self, item, max_seq_length, add_eos_token=True):
         assert self.tokenizer is not None
@@ -182,7 +184,7 @@ class Trainer():
         return training_dataset
 
     def train(self, training_text=None, new_peft_model_name=None, **kwargs):
-        print ("DEBUG train", training_text, new_peft_model_name, kwargs)
+        print ("DEBUG train", training_text[:1000], new_peft_model_name, kwargs)
         assert self.should_abort is False
         assert self.model is not None
         assert self.model_name is not None
@@ -220,7 +222,7 @@ class Trainer():
             learning_rate=kwargs['learning_rate'],
             fp16=True,  
             optim='adamw_torch',
-            logging_steps=20, 
+            logging_steps=1,
             save_total_limit=3,  
             output_dir=output_dir, 
         )
