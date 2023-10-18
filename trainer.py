@@ -42,6 +42,7 @@ class Trainer():
         gc.collect()
 
     def load_model(self, model_name, force=False, **kwargs):
+        print ("DEBUG load_model", model_name, force, kwargs)
         assert model_name is not None
 
         if (model_name == self.model_name and not force):
@@ -68,6 +69,7 @@ class Trainer():
         self.model_name = model_name
 
     def load_lora(self, lora_name, replace_model=True):
+        print ("DEBUG load_lora", lora_name, replace_model)
         assert self.model is not None
         assert lora_name is not None
 
@@ -105,6 +107,7 @@ class Trainer():
         self.lora_name = None
 
     def generate(self, prompt, **kwargs):
+        print ("DEBUG generate", prompt, kwargs)
         assert self.model is not None
         assert self.model_name is not None
         assert self.tokenizer is not None
@@ -179,6 +182,7 @@ class Trainer():
         return training_dataset
 
     def train(self, training_text=None, new_peft_model_name=None, **kwargs):
+        print ("DEBUG train", training_text, new_peft_model_name, kwargs)
         assert self.should_abort is False
         assert self.model is not None
         assert self.model_name is not None
