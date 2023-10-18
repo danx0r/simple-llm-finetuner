@@ -78,6 +78,7 @@ class Trainer():
 
         if lora_name in self.loras:
             self.lora_name = lora_name
+            print ("DEBUG set_adapter", lora_name)
             self.model.set_adapter(lora_name)
             return
         
@@ -102,6 +103,7 @@ class Trainer():
 
         self.lora_name = lora_name
         self.loras[lora_name] = True
+        print (f"DEBUG finished load_lora lora_name: {self.lora_name})")
 
     def unload_lora(self):
         self.lora_name = None
