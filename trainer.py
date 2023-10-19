@@ -142,8 +142,11 @@ class Trainer():
         )
 
         disable_lora = nullcontext()
-        if self.lora_name is None and hasattr(self.model, 'disable_adapter'):
-            disable_lora = self.model.disable_adapter()
+        if self.lora_name is None:
+            if hasattr(self.model, 'disable_adapter'):
+                disable_lora = self.model.disable_adapter()
+            else:
+                print ("WARNING: cannot disable lora")
 
         with torch.no_grad(), disable_lora:
             output = self.model.generate(
