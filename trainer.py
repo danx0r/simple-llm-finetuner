@@ -196,7 +196,7 @@ class Trainer():
         return training_dataset
 
     def train(self, training_text=None, new_peft_model_name=None, **kwargs):
-        print ("DEBUG train:", new_peft_model_name, kwargs, f"training_text:\n===================================\n{training_text}\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print ("DEBUG train:", new_peft_model_name, kwargs, f"training_text:\n===================================\n{training_text:1000}\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         assert self.should_abort is False
         assert self.model is not None
         assert self.model_name is not None
