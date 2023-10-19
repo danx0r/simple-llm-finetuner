@@ -4,6 +4,7 @@ import torch
 import transformers
 import peft
 import datasets
+import argparse
 from contextlib import nullcontext
 
 from config import (
@@ -301,15 +302,23 @@ class Trainer():
 
         
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Simple LLM Finetuner')
+    parser.add_argument('--test_inf', action='store_true', help='test inference without/with lora')
+    parser.add_argument('--run_training', action='store_true', help='train a lora in our midst')
+    argz = parser.parse_args()
+
     t = Trainer()
     t.load_model(MODEL)
 
-    args = {'do_sample': True, 'max_new_tokens': 80, 'num_beams': 1, 'repetition_penalty': 1.5, 'temperature': 0.1, 'top_p': 0.3, 'top_k': 40}
-    prompt = "Human: How is cheese made?\nAssistant:"
-    print(f"++++++OUTPUT no lora+++++++\n{t.generate(prompt, **args)}\n`````````````````````````````````")
+    if argz.test_inf:
+        args = {'do_sample': True, 'max_new_tokens': 80, 'num_beams': 1, 'repetition_penalty': 1.5, 'temperature': 0.1, 'top_p': 0.3, 'top_k': 40}
+        prompt = "Human: How is cheese made?\nAssistant:"
+        print(f"++++++OUTPUT no lora+++++++\n{t.generate(prompt, **args)}\n`````````````````````````````````")
 
-    t.load_lora(LORA_TRAINING_PARAMS['lora_name'])
-    print(f"++++++OUTPUT lora++++++++\n{t.generate(prompt, **args)}\n`````````````````````````````````")
+        t.load_lora(LORA_TRAINING_PARAMS['lora_name'])
+        print(f"++++++OUTPUT lora++++++++\n{t.generate(prompt, **args)}\n`````````````````````````````````")
 
-    t.unload_lora()
-    print(f"++++++OUTPUT unload lora+++++++\n{t.generate(prompt, **args)}\n````````````````````````````````")
+        t.unload_lora()
+        print(f"++++++OUTPUT unload lora+++++++\n{t.generate(prompt, **args)}\n````````````````````````````````")
+    if argz.run_training:
+        t.train()
