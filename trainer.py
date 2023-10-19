@@ -305,7 +305,10 @@ if __name__ == '__main__':
     t = Trainer()
     t.load_model(MODEL)
     if LORA_TRAINING_PARAMS['lora_train_from_shell']:
-        t.train()
+        f = open("example-datasets/example-data-unhelpful.txt")
+        training_text = f.read()
+        f.close()
+        t.train(training_text=training_text, new_peft_model_name="testunhelp")
     else:
         args = {'do_sample': True, 'max_new_tokens': 80, 'num_beams': 1, 'repetition_penalty': 1.5, 'temperature': 0.1, 'top_p': 0.3, 'top_k': 40}
         prompt = "Human: How is cheese made?\nAssistant:"
