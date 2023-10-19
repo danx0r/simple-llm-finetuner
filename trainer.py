@@ -53,9 +53,9 @@ class Trainer():
 
         self.model = transformers.AutoModelForCausalLM.from_pretrained(
             model_name,
-            device_map=DEVICE_MAP,
-            load_in_8bit=True,
-            torch_dtype=torch.float16,
+            # device_map=DEVICE_MAP,
+            # load_in_8bit=True,
+            torch_dtype=torch.float32,
         )
         #Clear the collection that tracks which adapters are loaded, as they are associated with self.model
         self.loras = {}
@@ -100,6 +100,7 @@ class Trainer():
             self.model = peft.PeftModel.from_pretrained(self.model, lora_name, adapter_name=lora_name)
             
         self.model.set_adapter(lora_name)
+        print ("DEBUG D", self.model_name)
         if (self.model_name.startswith('cerebras')):
             self.model.half()
 
