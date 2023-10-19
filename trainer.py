@@ -51,12 +51,19 @@ class Trainer():
         if (self.model is not None):
             self.unload_model()
 
-        self.model = transformers.AutoModelForCausalLM.from_pretrained(
-            model_name,
-            # device_map=DEVICE_MAP,
-            # load_in_8bit=True,
-            torch_dtype=torch.float32,
-        )
+        if HAS_CUDA:
+            self.model = transformers.AutoModelForCausalLM.from_pretrained(
+                model_name,
+                device_map=DEVICE_MAP,
+                load_in_8bit=True,
+                torch_dtype=torch.float16,
+            )
+        else:
+            self.model = transformers.AutoModelForCausalLM.from_pretrained(
+                model_name,
+                torch_dtype=torch.float32,
+            )
+
         #Clear the collection that tracks which adapters are loaded, as they are associated with self.model
         self.loras = {}
 
