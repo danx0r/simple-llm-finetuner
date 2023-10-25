@@ -4,6 +4,7 @@ import torch
 import transformers
 import peft
 import datasets
+import argparse
 from contextlib import nullcontext
 
 from config import (
@@ -42,6 +43,7 @@ class Trainer():
         gc.collect()
 
     def load_model(self, model_name, force=False, **kwargs):
+        print ("DEBUG load_model", model_name, force, kwargs)
         assert model_name is not None
 
         if (model_name == self.model_name and not force):
@@ -50,12 +52,19 @@ class Trainer():
         if (self.model is not None):
             self.unload_model()
 
-        self.model = transformers.AutoModelForCausalLM.from_pretrained(
-            model_name,
-            device_map=DEVICE_MAP,
-            load_in_8bit=True,
-            torch_dtype=torch.float16,
-        )
+        if HAS_CUDA:
+            self.model = transformers.AutoModelForCausalLM.from_pretrained(
+                model_name,
+                device_map=DEVICE_MAP,
+                load_in_8bit=True,
+                torch_dtype=torch.float16,
+            )
+        else:
+            self.model = transformers.AutoModelForCausalLM.from_pretrained(
+                model_name,
+                torch_dtype=torch.float32,
+            )
+
         #Clear the collection that tracks which adapters are loaded, as they are associated with self.model
         self.loras = {}
 
@@ -68,6 +77,7 @@ class Trainer():
         self.model_name = model_name
 
     def load_lora(self, lora_name, replace_model=True):
+        print ("DEBUG load_lora", lora_name, replace_model)
         assert self.model is not None
         assert lora_name is not None
 
@@ -76,6 +86,7 @@ class Trainer():
 
         if lora_name in self.loras:
             self.lora_name = lora_name
+            print ("DEBUG set_adapter", lora_name)
             self.model.set_adapter(lora_name)
             return
         
@@ -90,21 +101,26 @@ class Trainer():
         assert self.model is not None
         
         if hasattr(self.model, 'load_adapter'):
+            print ("DEBUG A")
             self.model.load_adapter(lora_name, adapter_name=lora_name)
         else:
+            print ("DEBUG B")
             self.model = peft.PeftModel.from_pretrained(self.model, lora_name, adapter_name=lora_name)
             
         self.model.set_adapter(lora_name)
+        print ("DEBUG D", self.model_name)
         if (self.model_name.startswith('cerebras')):
             self.model.half()
 
         self.lora_name = lora_name
         self.loras[lora_name] = True
+        print (f"DEBUG finished load_lora lora_name: {self.lora_name})")
 
     def unload_lora(self):
         self.lora_name = None
 
     def generate(self, prompt, **kwargs):
+        print ("DEBUG generate args:", kwargs, "prompt:", f"\n-----------------------------\n{prompt}\n__________________________")
         assert self.model is not None
         assert self.model_name is not None
         assert self.tokenizer is not None
@@ -126,8 +142,11 @@ class Trainer():
         )
 
         disable_lora = nullcontext()
-        if self.lora_name is None and hasattr(self.model, 'disable_adapter'):
-            disable_lora = self.model.disable_adapter()
+        if self.lora_name is None:
+            if hasattr(self.model, 'disable_adapter'):
+                disable_lora = self.model.disable_adapter()
+            else:
+                print ("WARNING: cannot disable lora")
 
         with torch.no_grad(), disable_lora:
             output = self.model.generate(
@@ -136,7 +155,9 @@ class Trainer():
                 generation_config=generation_config
             )[0].to(self.model.device)
 
-        return self.tokenizer.decode(output, skip_special_tokens=True).strip()
+        ret = self.tokenizer.decode(output, skip_special_tokens=True).strip()
+        print ("DEBUG generate returns:", f"\n++++++++++++++++++++++++++++++++++++++\n{ret}\n```````````````````````````````````")
+        return ret
     
     def tokenize_sample(self, item, max_seq_length, add_eos_token=True):
         assert self.tokenizer is not None
@@ -179,6 +200,7 @@ class Trainer():
         return training_dataset
 
     def train(self, training_text=None, new_peft_model_name=None, **kwargs):
+        print ("DEBUG train:", new_peft_model_name, kwargs, f"training_text:\n===================================\n{training_text[:1000]}\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         assert self.should_abort is False
         assert self.model is not None
         assert self.model_name is not None
@@ -216,7 +238,7 @@ class Trainer():
             learning_rate=kwargs['learning_rate'],
             fp16=True,  
             optim='adamw_torch',
-            logging_steps=20, 
+            logging_steps=1,
             save_total_limit=3,  
             output_dir=output_dir, 
         )
@@ -285,12 +307,18 @@ class Trainer():
 if __name__ == '__main__':
     t = Trainer()
     t.load_model(MODEL)
+    if LORA_TRAINING_PARAMS['lora_train_from_shell']:
+        f = open("example-datasets/example-data-unhelpful.txt")
+        training_text = f.read()
+        f.close()
+        t.train(training_text=training_text, new_peft_model_name="testunhelp")
+    else:
+        args = {'do_sample': True, 'max_new_tokens': 80, 'num_beams': 1, 'repetition_penalty': 1.5, 'temperature': 0.1, 'top_p': 0.3, 'top_k': 40}
+        prompt = "Human: How is cheese made?\nAssistant:"
+        print(f"++++++OUTPUT no lora+++++++\n{t.generate(prompt, **args)}\n`````````````````````````````````")
 
-    prompt = "Human: How is cheese made?\n\nAssistant:"
-    print(t.generate(prompt))
+        t.load_lora(LORA_TRAINING_PARAMS['lora_name'])
+        print(f"++++++OUTPUT lora++++++++\n{t.generate(prompt, **args)}\n`````````````````````````````````")
 
-    t.load_lora('lora/melon-mango-orange')
-    print(t.generate(prompt))
-
-    t.unload_lora()
-    print(t.generate(prompt))
+        t.unload_lora()
+        print(f"++++++OUTPUT unload lora+++++++\n{t.generate(prompt, **args)}\n````````````````````````````````")

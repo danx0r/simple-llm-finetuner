@@ -19,6 +19,7 @@ parser.add_argument('--models',
 
 parser.add_argument('--device-map', type=str, default='', help='Device map to use')
 parser.add_argument('--model', type=str, default='cerebras/Cerebras-GPT-2.7B', help='Model to use')
+parser.add_argument('--lora', type=str, default='', help='Lora to use')
 parser.add_argument('--max-seq-length', type=int, default=256, help='Max sequence length')
 parser.add_argument('--micro-batch-size', type=int, default=12, help='Micro batch size')
 parser.add_argument('--gradient-accumulation-steps', type=int, default=8, help='Gradient accumulation steps')
@@ -37,6 +38,7 @@ parser.add_argument('--num-beams', type=int, default=1, help='Number of beams')
 parser.add_argument('--share', action='store_true', default=False, help='Whether to deploy the interface with Gradio')
 parser.add_argument('--host', type=str, default='127.0.0.1', help='Host name or IP to launch Gradio webserver on')
 parser.add_argument('--port', type=int, default=7860, help='Host port to launch Gradio webserver on')
+parser.add_argument('--run_training', action='store_true', help='train a lora in our midst')
 
 args = parser.parse_args()
 
@@ -53,9 +55,11 @@ TRAINING_PARAMS = {
 }
 
 LORA_TRAINING_PARAMS = {
+    'lora_name': args.lora,
     'lora_r': args.lora_r,
     'lora_alpha': args.lora_alpha,
     'lora_dropout': args.lora_dropout,
+    'lora_train_from_shell': args.run_training
 }
 
 GENERATION_PARAMS = {
